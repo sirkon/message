@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 // Color ...
@@ -26,6 +27,8 @@ const (
 	anchor = "\033["
 )
 
+var debug bool
+
 func split(message string) []string {
 	var splits []string
 	for len(message) > 0 {
@@ -43,8 +46,21 @@ func split(message string) []string {
 	}
 	return splits
 }
+func fileLine() string {
+	_, fileName, fileLine, ok := runtime.Caller(5)
+	var s string
+	if ok {
+		s = fmt.Sprintf("%s:%d", fileName, fileLine)
+	} else {
+		s = ""
+	}
+	return s
+}
 
 func printer(color Color, message string) string {
+	if debug {
+		message = fileLine() + " " + message
+	}
 	parts := split(message)
 	buffer := &bytes.Buffer{}
 	buffer.WriteString(string(color))
@@ -65,6 +81,18 @@ func println(color Color, data ...interface{}) {
 func printf(color Color, format string, data ...interface{}) {
 	msg := fmt.Sprintf(format, data...)
 	println(color, msg)
+}
+
+// Fatalf print yellow formatted message
+func Fatalf(format string, data ...interface{}) {
+	printf(boldred, format, data...)
+	os.Exit(1)
+}
+
+// Fatal print red message and exit
+func Fatal(data ...interface{}) {
+	println(boldred, data...)
+	os.Exit(1)
 }
 
 // Criticalf print yellow formatted message
@@ -117,4 +145,10 @@ func Infof(format string, data ...interface{}) {
 // Info print yellow message
 func Info(data ...interface{}) {
 	println(reset, data...)
+}
+
+func init() {
+	if os.Getenv("DEBUG") != "" {
+		debug = true
+	}
 }
