@@ -147,6 +147,16 @@ func Info(data ...interface{}) {
 	println(reset, data...)
 }
 
+// Debugf print yellow formatted message
+func Debugf(format string, data ...interface{}) {
+	printf(cyan, format, data...)
+}
+
+// Debug print yellow message
+func Debug(data ...interface{}) {
+	println(cyan, data...)
+}
+
 func init() {
 	if os.Getenv("DEBUG") != "" {
 		debug = true
