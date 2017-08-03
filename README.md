@@ -2,7 +2,7 @@
 Not everyone needs configured logging.
 
 ```bash
-go get github.com/glossina/message
+go get github.com/sirkon/message
 ```
 
 This library is primarily for command line short lived utilities where the time output is not needed. Only message itself.
@@ -26,7 +26,7 @@ What is supported:
 ```go
 package main
 
-import "github.com/glossina/message"
+import "github.com/sirkon/message"
 
 func main() {
 	message.Notice("Hello world!")
