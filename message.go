@@ -28,24 +28,28 @@ const (
 )
 
 var debug bool
+var useColor bool = true
 
 func split(message string) []string {
 	var splits []string
+	ci := ColorInfo{}
 	for len(message) > 0 {
-		p := &colorExtractor{}
-		ok, _ := p.Parse([]byte(message))
+		ok, _ := ci.Extract(message)
 		if !ok {
 			splits = append(splits, message)
 			break
 		}
-		if len(p.Head) > 0 {
-			splits = append(splits, string(p.Head))
+		if len(ci.Text) > 0 {
+			splits = append(splits, ci.Text)
 		}
-		splits = append(splits, "\033["+string(p.Code)+"m")
-		message = string(p.Rest)
+		if useColor {
+			splits = append(splits, fmt.Sprintf("\033[%dm", ci.Code))
+		}
+		message = ci.rest
 	}
 	return splits
 }
+
 func fileLine() string {
 	_, fileName, fileLine, ok := runtime.Caller(5)
 	var s string
@@ -63,14 +67,18 @@ func printer(color Color, message string) string {
 	}
 	parts := split(message)
 	buffer := &bytes.Buffer{}
-	buffer.WriteString(string(color))
+	if useColor {
+		buffer.WriteString(string(color))
+	}
 	for _, p := range parts {
 		buffer.WriteString(p)
-		if p == string(reset) {
+		if p == string(reset) && useColor {
 			buffer.WriteString(string(color))
 		}
 	}
-	buffer.WriteString(string(reset))
+	if useColor {
+		buffer.WriteString(string(reset))
+	}
 	return buffer.String()
 }
 
@@ -155,6 +163,16 @@ func Debugf(format string, data ...interface{}) {
 // Debug print yellow message
 func Debug(data ...interface{}) {
 	println(cyan, data...)
+}
+
+// SetDebug sets debug on/off depending on the status
+func SetDebug(status bool) {
+	debug = status
+}
+
+// UseColor enables/disables color output depending on the decision's value
+func UseColor(decision bool) {
+	useColor = decision
 }
 
 func init() {
