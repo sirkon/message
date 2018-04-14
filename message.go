@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
+	"path/filepath"
 )
 
 // Color ...
@@ -50,15 +52,21 @@ func split(message string) []string {
 	return splits
 }
 
+// fileLine retuns string "<file name>:<line number>". File name and line number are the first that are not from this
+// package
 func fileLine() string {
-	_, fileName, fileLine, ok := runtime.Caller(5)
-	var s string
-	if ok {
-		s = fmt.Sprintf("%s:%d", fileName, fileLine)
-	} else {
-		s = ""
+	fpcs := make([]uintptr, 10)
+	frameIter := runtime.CallersFrames(fpcs[:runtime.Callers(2, fpcs)])
+	for {
+		frame, more := frameIter.Next()
+		_, name := filepath.Split(frame.Function)
+		if !strings.HasPrefix(name, "message.") {
+			return fmt.Sprintf("%s:%d", frame.File, frame.Line)
+		}
+		if !more {
+			return "<unknown file>:<unknown line>"
+		}
 	}
-	return s
 }
 
 func printer(color Color, message string) string {
@@ -82,87 +90,87 @@ func printer(color Color, message string) string {
 	return buffer.String()
 }
 
-func println(color Color, data ...interface{}) {
+func printLine(color Color, data ...interface{}) {
 	os.Stderr.Write([]byte(printer(color, fmt.Sprintln(data...))))
 }
 
-func printf(color Color, format string, data ...interface{}) {
+func printFormat(color Color, format string, data ...interface{}) {
 	msg := fmt.Sprintf(format, data...)
-	println(color, msg)
+	printLine(color, msg)
 }
 
 // Fatalf print yellow formatted message
 func Fatalf(format string, data ...interface{}) {
-	printf(boldred, format, data...)
+	printFormat(boldred, format, data...)
 	os.Exit(1)
 }
 
 // Fatal print red message and exit
 func Fatal(data ...interface{}) {
-	println(boldred, data...)
+	printLine(boldred, data...)
 	os.Exit(1)
 }
 
 // Criticalf print yellow formatted message
 func Criticalf(format string, data ...interface{}) {
-	printf(boldred, format, data...)
+	printFormat(boldred, format, data...)
 	os.Exit(1)
 }
 
 // Critical print red message and exit
 func Critical(data ...interface{}) {
-	println(boldred, data...)
+	printLine(boldred, data...)
 	os.Exit(1)
 }
 
 // Errorf print yellow formatted message
 func Errorf(format string, data ...interface{}) {
-	printf(boldred, format, data...)
+	printFormat(boldred, format, data...)
 }
 
 // Error print red message and exit
 func Error(data ...interface{}) {
-	println(boldred, data...)
+	printLine(boldred, data...)
 }
 
 // Warningf print yellow formatted message
 func Warningf(format string, data ...interface{}) {
-	printf(yellow, format, data...)
+	printFormat(yellow, format, data...)
 }
 
 // Warning print yellow message
 func Warning(data ...interface{}) {
-	println(yellow, data...)
+	printLine(yellow, data...)
 }
 
 // Noticef print yellow formatted message
 func Noticef(format string, data ...interface{}) {
-	printf(green, format, data...)
+	printFormat(green, format, data...)
 }
 
 // Notice print yellow message
 func Notice(data ...interface{}) {
-	println(green, data...)
+	printLine(green, data...)
 }
 
 // Infof print yellow formatted message
 func Infof(format string, data ...interface{}) {
-	printf(reset, format, data...)
+	printFormat(reset, format, data...)
 }
 
 // Info print yellow message
 func Info(data ...interface{}) {
-	println(reset, data...)
+	printLine(reset, data...)
 }
 
 // Debugf print yellow formatted message
 func Debugf(format string, data ...interface{}) {
-	printf(cyan, format, data...)
+	printFormat(cyan, format, data...)
 }
 
 // Debug print yellow message
 func Debug(data ...interface{}) {
-	println(cyan, data...)
+	printLine(cyan, data...)
 }
 
 // SetDebug sets debug on/off depending on the status

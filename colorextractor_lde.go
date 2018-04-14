@@ -12,7 +12,7 @@ var bslash033Lsbrck = "\033["
 type ColorInfo struct {
 	rest string
 	Text string
-	Code int
+	Code int 
 }
 
 // Extract ...
