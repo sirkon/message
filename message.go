@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"path/filepath"
+	"io"
 )
 
 // Color ...
@@ -31,6 +32,7 @@ const (
 
 var debug bool
 var useColor bool = true
+var dest io.Writer = os.Stderr
 
 func split(message string) []string {
 	var splits []string
@@ -91,7 +93,7 @@ func printer(color Color, message string) string {
 }
 
 func printLine(color Color, data ...interface{}) {
-	os.Stderr.Write([]byte(printer(color, fmt.Sprintln(data...))))
+	io.WriteString(dest, printer(color, fmt.Sprintln(data...)))
 }
 
 func printFormat(color Color, format string, data ...interface{}) {
@@ -181,6 +183,11 @@ func SetDebug(status bool) {
 // UseColor enables/disables color output depending on the decision's value
 func UseColor(decision bool) {
 	useColor = decision
+}
+
+// SetDest sets print destination. Default destination is os.Stderr
+func SetDest(d io.Writer) {
+	dest = d
 }
 
 func init() {
