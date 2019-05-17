@@ -32,3 +32,4 @@ func main() {
 	message.Notice("Hello world!")
 }
 ```
+
