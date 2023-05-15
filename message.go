@@ -3,11 +3,11 @@ package message
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
-	"path/filepath"
-	"io"
 )
 
 // Color ...
@@ -104,24 +104,28 @@ func printFormat(color Color, format string, data ...interface{}) {
 // Fatalf print yellow formatted message
 func Fatalf(format string, data ...interface{}) {
 	printFormat(boldred, format, data...)
+	execHooks()
 	os.Exit(1)
 }
 
 // Fatal print red message and exit
 func Fatal(data ...interface{}) {
 	printLine(boldred, data...)
+	execHooks()
 	os.Exit(1)
 }
 
 // Criticalf print yellow formatted message
 func Criticalf(format string, data ...interface{}) {
 	printFormat(boldred, format, data...)
+	execHooks()
 	os.Exit(1)
 }
 
 // Critical print red message and exit
 func Critical(data ...interface{}) {
 	printLine(boldred, data...)
+	execHooks()
 	os.Exit(1)
 }
 
