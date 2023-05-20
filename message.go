@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/sirkon/errors"
 )
 
 // Color ...
@@ -94,6 +96,19 @@ func printer(color Color, message string) string {
 
 func printLine(color Color, data ...interface{}) {
 	io.WriteString(dest, printer(color, fmt.Sprintln(data...)))
+	if len(data) != 1 || !isType[error](data[0]) {
+		return
+	}
+
+	del := errors.GetContextDeliverer(data[0].(error))
+	if del == nil {
+		return
+	}
+
+	c := cons{
+		dst: dest,
+	}
+	del.Deliver(c)
 }
 
 func printFormat(color Color, format string, data ...interface{}) {
@@ -198,4 +213,9 @@ func init() {
 	if os.Getenv("DEBUG") != "" {
 		debug = true
 	}
+}
+
+func isType[T any](v any) bool {
+	_, ok := v.(T)
+	return ok
 }
